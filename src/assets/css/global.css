@@ -1,0 +1,17 @@
+.ticketList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+  justify-content: center;
+  padding: 1em;
+}
+
+.ticketCard {
+  background-color: #f9f9f9;
+  border: 1px solid #c0a9a9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  padding: 1em;
+  text-align: left;
+}
