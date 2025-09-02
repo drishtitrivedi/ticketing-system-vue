@@ -98,7 +98,7 @@ export default {
     },
     runClassification() {
       axios.post(`http://localhost:8000/api/tickets/${this.form.id}/classify`).then(() => {
-        console.log("Ticket Created",this.form);
+        console.log("Ticket Classified",this.form);
       });
     }
   },
