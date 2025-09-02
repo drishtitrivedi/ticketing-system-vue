@@ -9,10 +9,11 @@
         </div>
 
         <div class="form-group">
-          <label for="status">Status</label>
+          <label for="status">Status</label> {{  form.status }}
           <select v-model="form.status" id="status" required>
-            <option value="Open">Open</option>
-            <option value="Closed">Closed</option>
+           <option v-for="s in all_status" :key="s" :value="s" :selected="s == form.category">
+             {{ s }}
+            </option>
           </select>
         </div>
 
@@ -22,11 +23,11 @@
         </div>
 
         <div class="form-group">
-          <label for="category">Category</label>
+          <label for="category">Category  {{  form.category }}</label>
           <select v-model="form.category" id="category">
-            <option value="General">General</option>
-            <option value="Technical">Technical</option>
-            <option value="Billing">Billing</option>
+           <option v-for="c in categories" :key="c" :value="c" :selected="c == form.category">
+             {{ c }}
+            </option>
           </select>
         </div>
 
@@ -47,6 +48,7 @@
         </div>
 
         <div class="actions">
+          <button type="button" class="classification" @click="runClassification">Run Classification</button>
           <button type="button" @click="this.$router.push('/tickets') ">Cancel</button>
           <button type="submit">Save</button>
         </div>
@@ -58,114 +60,56 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: "EditTicket",
-  props: {
-    // id: {
-    //   type: Integer,
-    //   default: null,
-    // },
-  },
   data() {
+
+    const categories = ['Bug','Feature','Improvment','Task','Epic','Support'];
+
+    const all_status = ['open', 'closed'];
+
+    const id = this.$route.params.id
 
     let form = {};
     
-    const sampleTickets = [
-            {
-                id: 1,
-                subject: 'Sample Ticket',
-                status: 'Open',
-                category: 'General',
-                confidance: 0.95,
-                explanation:" This is a sample ticket for demonstration purposes.",
-                note: "This is a sample note.",
-                created_at: '2024-01-01 10:00:00'
-            },
-            {
-                id: 2,
-                subject: 'Another Ticket',
-                status: 'Closed',
-                category: 'Technical',
-                confidance: 0.85,
-                explanation:" This ticket has been closed.",
-                note:"",
-                created_at: '2024-01-02 11:00:00'
-        },
-            {
-                id: 3,
-                subject: 'Third Ticket',
-                status: 'In Progress',
-                category: 'Billing',
-                confidance: 0.90,
-                explanation:" This ticket is currently being worked on.",
-                note: "Follow up next week.",
-                created_at: '2024-01-03 12:00:00'
-            }
-        ];
         if (this.$route.params.id) {
-            form = sampleTickets.find(t => t.id === parseInt(this.$route.params.id));
+           axios.get(`http://localhost:8000/api/tickets/${id}`).then(response => {
+            const ticket = response.data;
+            this.form = ticket;
+            this.loading = false;
+          }).catch(error => {
+              console.error('Error fetching tickets:', error)
+          });
         } 
 
     return {
-      form,
+      form, categories, all_status
     };
   },
   methods: {
-    open(ticket) {
-        console.log("Opening ticket:", ticket);
-    },
     submitForm() {
-      // axios.patch(`/api/tickets/${this.ticketId}`, this.form).then(() => {
-      //     alert("Ticket updated!");
-      //   });
-       this.$router.push('/tickets') 
+      axios.patch(`http://localhost:8000/api/tickets/${this.form.id}`, this.form).then(() => {
+          alert("Ticket updated!");
+        });
+
+      this.$router.push({ name: "Tickets" });
     },
+    runClassification() {
+      axios.post(`http://localhost:8000/api/tickets/${this.form.id}/classify`).then(() => {
+        console.log("Ticket Created",this.form);
+      });
+    }
   },
 
 };
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal {
-  background: white;
-  padding: 20px;
-  border-radius: 6px;
-  width: 800px;
-  max-width: 90%;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-.form-group label {
-  display: block;
+.classification {
+  background-color: #08ea5f;
+  color: #fff;
   font-weight: bold;
-  margin-bottom: 5px;
-}
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-.actions button {
-  padding: 6px 12px;
 }
 </style>
